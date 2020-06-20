@@ -2,18 +2,37 @@ version: "3"
 services:
   postgres:
     image: postgres
+    container_name: postgres
+    command: "postgres -c log_connections=true -c log_min_duration_statement=0"
+    restart: always
     environment:
       POSTGRES_DB: locationapi
       POSTGRES_USER: locationapi
       POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - 5432:5432
     volumes:
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - ./postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U locationapi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
   locationapi:
+    container_name: locationapi
     image: locationapi:latest
     ports:
       - "8080:8080"
     links:
       - postgres
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

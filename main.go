@@ -7,6 +7,7 @@ import (
 	"locationapi/locations"
 	"locationapi/postgres"
 	"log"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -53,7 +54,8 @@ func setupPostgres(host, user, password, dbname string, port uint) *sql.DB {
 		log.Println("could not open connection to postgres")
 		panic(err)
 	}
-
+	log.Println("opened postgres connection")
+	time.Sleep(5 * time.Second)
 	err = db.Ping()
 	if err != nil {
 		log.Println("could not ping database")

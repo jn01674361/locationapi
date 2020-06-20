@@ -9,14 +9,24 @@ type locationRepository interface {
 	StoreLocation(structs.Location)
 }
 
-type locationService struct {
+// LocationService location service
+type LocationService struct {
 	repository locationRepository
 }
 
-func (ls *locationService) GetLocations() []structs.Location {
+// GetLocations gets locations
+func (ls LocationService) GetLocations() []structs.Location {
 	return ls.repository.ListLocations()
 }
 
-func (ls *locationService) PostLocation(location structs.Location) {
+// PostLocation posts locations
+func (ls LocationService) PostLocation(location structs.Location) {
 	ls.repository.StoreLocation(location)
+}
+
+// NewLocationService returns a new location
+func NewLocationService(repo locationRepository) LocationService {
+	return LocationService{
+		repository: repo,
+	}
 }

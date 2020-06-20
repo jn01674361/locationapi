@@ -1,0 +1,19 @@
+version: "3"
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_DB: locationapi
+      POSTGRES_USER: locationapi
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./postgres-data:/var/lib/postgresql/data
+  locationapi:
+    image: locationapi:latest
+    ports:
+      - "8080:8080"
+    links:
+      - postgres

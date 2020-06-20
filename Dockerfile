@@ -1,3 +1,4 @@
+# Prepate for build
 FROM golang
 
 ENV GO111MODULE=on \
@@ -5,15 +6,14 @@ ENV GO111MODULE=on \
     GOOS=linux \
     GOARCH=amd64
 
-# Move to working directory /build
 WORKDIR /build
 
 COPY go.mod .
 COPY go.sum .
 RUN go mod download
-
 COPY . .
 
+# Deploy
 RUN go build -o main .
 
 WORKDIR /cmd

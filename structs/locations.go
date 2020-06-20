@@ -1,7 +1,10 @@
 package structs
 
+import "github.com/google/uuid"
+
 // Location represents a client's location
 type Location struct {
+	ID          uuid.UUID   `json:"id"`
 	Coordinates Coordinates `json:"coordinates"`
 	Metadata    Metadata    `json:"metadata"`
 }

@@ -1,4 +1,9 @@
 # locationapi
 
-## Run server
-- $ make local
+### Prerequisites
+- docker
+
+### Run
+```
+$ make local
+```

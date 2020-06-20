@@ -26,7 +26,7 @@ func (s *Server) Open() {
 
 	muxRouter.Handle("/", NotImplemented).Methods(http.MethodGet)
 	muxRouter.Handle("/locations", s.getLocations()).Methods(http.MethodGet)
-	muxRouter.Handle("/locations", GetLocationsFunc).Methods(http.MethodPost)
+	muxRouter.Handle("/locations", s.postLocations()).Methods(http.MethodPost)
 
 	http.ListenAndServe(":8080", muxRouter)
 }

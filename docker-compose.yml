@@ -32,6 +32,16 @@ services:
       - postgres
     networks:
       - backend
+  frontend:
+    container_name: react-frontend
+    image: frontend:latest
+    ports:
+      - "3000:3000"
+    links:
+      - locationapi
+    networks:
+      - backend
+    stdin_open: true
 
 networks:
   backend:

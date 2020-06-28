@@ -22,7 +22,6 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios("http://localhost:8080/locations");
-      console.log(result);
       setData(result.data);
     };
 
@@ -63,13 +62,6 @@ function App() {
 
   return (
     <div>
-      <Fragment>
-        <ul>
-          {Array.from(data).map(item => (
-            <li key={item.id}>{item.id}</li>
-          ))}
-        </ul>
-      </Fragment>
       <div>
         <p>hi</p>
         <form>
@@ -123,6 +115,19 @@ function App() {
           </div>
         </form>
       </div>
+      <Fragment>
+        <ul>
+          {Array.from(data).map((item, num) =>
+            item.hasOwnProperty("metadata") ? (
+              <li key={num}>
+                {item.metadata.hasOwnProperty("name") ? item.metadata.name : {}}
+              </li>
+            ) : (
+              {}
+            )
+          )}
+        </ul>
+      </Fragment>
     </div>
   );
 }

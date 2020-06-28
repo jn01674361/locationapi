@@ -16,11 +16,16 @@ type Repository struct {
 // ListLocations l
 func (p Repository) ListLocations() []structs.Location {
 	res := make([]structs.Location, 0)
-	sqlStatement := "SELECT * FROM locations;"
+	sqlStatement := `
+	SELECT 
+		* 
+	FROM 
+		locations;`
 
 	var id uuid.UUID
 	var lat, lon float32
-	var name, locationType string
+	var locationType string
+	var name *string
 
 	rows, err := p.db.Query(sqlStatement)
 	if err != nil {
@@ -39,8 +44,8 @@ func (p Repository) ListLocations() []structs.Location {
 					Lon: lon,
 				},
 				Metadata: structs.Metadata{
-					// Type: locationType,
-					// Name: name,
+					Type: structs.LocationType(locationType),
+					Name: name,
 				},
 			}
 			res = append(res, loc)
@@ -54,12 +59,19 @@ func (p Repository) ListLocations() []structs.Location {
 }
 
 // StoreLocation s
-func (p Repository) StoreLocation(structs.Location) {
+func (p Repository) StoreLocation(location structs.Location) {
 
 	sqlStatement := `
 		INSERT INTO locations (id, latitude, longitude, location_name, location_type)
 		VALUES ($1, $2, $3, $4, $5)`
-	_, err := p.db.Exec(sqlStatement, uuid.New(), 10.2, 1.1, "King's Cross Station", "public")
+	_, err := p.db.Exec(
+		sqlStatement,
+		uuid.New(),
+		location.Coordinates.Lat,
+		location.Coordinates.Lon,
+		location.Metadata.Name,
+		location.Metadata.Type,
+	)
 	if err != nil {
 		panic(err)
 	}

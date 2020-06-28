@@ -1,4 +1,10 @@
-import React, { useState } from "react";
+import React, {
+  Fragment,
+  useState,
+  useEffect,
+  useCallback,
+  useRef
+} from "react";
 import { Button, TextField } from "@material-ui/core";
 import axios from "axios";
 import "./App.css";
@@ -8,26 +14,28 @@ function App() {
   const [lat, setLat] = useState(0.0);
   const [lon, setLon] = useState(0.0);
   const [type, setType] = useState("");
+  const [data, setData] = useState({});
+  const [isSending, setIsSending] = useState(false);
 
-  const handleSubmit = (lat, lon, name, type) => {
-    const response = axios.post(
-      "http://localhost:8080/locations",
-      {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      },
-      JSON.stringify({
-        lat: lat,
-        lon: lon,
-        name: name,
-        type: type
-      })
-    );
+  const isMounted = useRef(true);
 
-    fetch("http://localhost:8080/locations", {
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await axios("http://localhost:8080/locations");
+      console.log(result);
+      setData(result.data);
+    };
+
+    fetchData();
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  function makePost() {
+    axios("http://localhost:8080/locations", {
       method: "POST",
       headers: {
-        Accept: "application/json",
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -36,62 +44,86 @@ function App() {
         name: name,
         type: type
       })
-    }).then(response => console.log(response.json));
-    console.log("-------");
-    alert(`Submitted`);
-  };
+    }).then(error => console.log(error));
+  }
+
+  const sendRequest = useCallback(async () => {
+    // don't send again while we are sending
+    if (isSending) return;
+    // update state
+    setIsSending(true);
+    // send the actual request
+    await makePost();
+    // once the request is sent, update state again
+    setIsSending(false);
+    if (isMounted.current)
+      // only update if we are still mounted
+      setIsSending(false);
+  }, [isSending]); // update the callback if the state changes
 
   return (
-    <form
-      onSubmit={(lat, lon, name, type) => handleSubmit(lat, lon, name, type)}
-    >
+    <div>
+      <Fragment>
+        <ul>
+          {Array.from(data).map(item => (
+            <li key={item.id}>{item.id}</li>
+          ))}
+        </ul>
+      </Fragment>
       <div>
-        <TextField
-          type="input"
-          id="lat"
-          label="Latitude"
-          variant="outlined"
-          onChange={e => setLat(e.target.value)}
-        />
+        <p>hi</p>
+        <form>
+          <div>
+            <TextField
+              type="input"
+              id="lat"
+              label="Latitude"
+              variant="outlined"
+              onChange={e => setLat(e.target.value)}
+            />
+          </div>
+          <div>
+            <TextField
+              type="input"
+              id="lon"
+              label="Longitude"
+              variant="outlined"
+              onChange={e => setLon(e.target.value)}
+            />
+          </div>
+          <div>
+            <TextField
+              type="input"
+              id="type"
+              label="Location Type"
+              variant="outlined"
+              onChange={e => setType(e.target.value)}
+            />
+          </div>
+          <div>
+            <TextField
+              type="input"
+              id="name"
+              label="Location Name"
+              variant="outlined"
+              onChange={e => setName(e.target.value)}
+            />
+          </div>
+          <div>
+            <Button
+              type="submit"
+              value="Submit"
+              variant="contained"
+              color="primary"
+              onClick={sendRequest}
+              disabled={isSending}
+            >
+              Submit
+            </Button>
+          </div>
+        </form>
       </div>
-      <div>
-        <TextField
-          type="input"
-          id="lon"
-          label="Longitude"
-          variant="outlined"
-          onChange={e => setLon(e.target.value)}
-        />
-      </div>
-      <div>
-        <TextField
-          type="input"
-          id="type"
-          label="Location Type"
-          variant="outlined"
-          onChange={e => setType(e.target.value)}
-        />
-      </div>
-      <div>
-        <TextField
-          type="input"
-          id="name"
-          label="Location Name"
-          variant="outlined"
-          onChange={e => setName(e.target.value)}
-        />
-      </div>
-      <div>
-        <Button
-          type="submit"
-          value="Submit"
-          variant="contained"
-          color="primary"
-        >
-          Submit
-        </Button>
-      </div>
-    </form>
+    </div>
   );
 }
 

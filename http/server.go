@@ -34,6 +34,7 @@ func (s *Server) Open() {
 func (s Server) getLocations() http.HandlerFunc {
 	log.Println("about get locations")
 	return func(w http.ResponseWriter, r *http.Request) {
+		enableCors(&w)
 		res := s.locationService.GetLocations()
 		j, err := json.Marshal(res)
 		if err != nil {
@@ -47,7 +48,12 @@ func (s Server) getLocations() http.HandlerFunc {
 func (s Server) postLocations() http.HandlerFunc {
 	log.Println("about to post locations")
 	return func(w http.ResponseWriter, r *http.Request) {
-		s.locationService.PostLocation(structs.Location{})
+		enableCorsPost(&w)
+		var data structs.Location
+		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+			log.Println(err)
+		}
+		s.locationService.PostLocation(data)
 		w.Write([]byte("byte"))
 	}
 
@@ -66,4 +72,14 @@ var NotImplemented = http.HandlerFunc(func(w http.ResponseWriter, r *http.Reques
 // NewServer returns a new router.
 func NewServer(location LocationService) Server {
 	return Server{locationService: location}
+}
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
+func enableCorsPost(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 }
